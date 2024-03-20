@@ -1,0 +1,183 @@
+{#
+/**
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @since         2.0.0
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ */
+#}
+<?php
+	$this->assign('title', __('{{ action|humanize }}') . ' ' . __('{{ singularHumanName }}'));
+?>
+{% set fields = Bake.filterFields(fields, schema, modelObject) %}
+			<div class="bs-component col-md-11 mb-2 shadow">
+              <div class="card">
+                <div class="card-header">
+
+					<div class="row">
+						<div class="col-md-6">
+							<?= $this->Html->link('<span class="btn-label"><i class="fa fa-arrow-left"></i></span>' . __('Back to list'), ['action' => 'index'], ['class' => 'btn btn-secondary me-2', 'escape' => false]) ?>
+							<?= $this->Html->link('<span class="btn-label"><i class="fa fa-save"></i></span>' . __('Save'), [], ['id' => 'button-submit', 'class' => 'btn btn-success me-2', 'escape' => false]) ?>
+{% if 'add' not in action %}
+<?php /*
+							<?= $this->Form->postLink('', ['action' => 'delete', ${{ singularVar }}->{{ primaryKey[0] }}], ['class'=>'hide-postlink index-delete-button-class', 'escape' => false]) ?>
+							<a href="javascript:;" class="btn btn-danger me-2 postlink-delete" data-bs-tooltip="tooltip" data-bs-placement="top" title="<?= __("Delete this record!") ?>" text="<?= h(${{ singularVar }}->name) ?>" subText="<?= __("You will not be able to revert this!") ?>" confirmButtonText="<?= __("Yes, delete it!") ?>" cancelButtonText="<?= __("Cancel") ?>"><span class="btn-label"><i class="fa fa-minus"></i></span><?= __('Delete') ?></a>
+*/ ?>
+{% endif %}
+						</div>
+
+						<div class="col-md-5 form-tab-container">
+							<div class="form-tabs">
+								<ul class="nav nav-tabs justify-content-end" role="tablist">
+									<li class="nav-item" role="presentation">
+										<a class="nav-link active" id="simple-tab-0" data-bs-toggle="tab" href="#simple-tabpanel-0" role="tab" aria-controls="simple-tabpanel-0" aria-selected="true"><?= __('Details') ?></a>
+									</li>
+<?php /*
+									<li class="nav-item" role="presentation">
+										<a class="nav-link" id="simple-tab-1" data-bs-toggle="tab" href="#simple-tabpanel-1" role="tab" aria-controls="simple-tabpanel-1" aria-selected="false">2. <?= __('Page') ?></a>
+									</li>
+									<li class="nav-item" role="presentation">
+										<a class="nav-link" id="simple-tab-2" data-bs-toggle="tab" href="#simple-tabpanel-2" role="tab" aria-controls="simple-tabpanel-2" aria-selected="false">3. <?= __('Page') ?></a>
+									</li>
+*/ ?>
+								</ul>							
+							</div>
+						</div>
+						
+						<div class="col-md-1 text-end">
+							<a role="button" href="/admin/posts" class="btn btn-outline-secondary"><i class="fa fa-times"></i></a>
+						</div>
+					</div>
+				</div>
+
+				<div class="card-body">
+
+				  <?= $this->Form->create(${{ singularVar }}, ['id' => 'main-form', 'class' => 'form-horizontal was-validated', 'novalidate' => true]) ?>
+					
+					<div class="tab-content" id="tab-content">
+					
+						<div class="tab-pane active" id="simple-tabpanel-0" role="tabpanel" aria-labelledby="simple-tab-0">
+{% for field in fields %}
+{%- if field not in primaryKey %}
+    {%- if keyFields[field] is defined %}
+        {%- set fieldData = Bake.columnData(field, schema) %}
+        {%- if fieldData.null %}
+							<?= $this->Form->control('{{ field }}', ['options' => ${{ keyFields[field] }}, 'empty' => true]); ?><!-- 1. -->
+							{{- "\n" }}
+        {%- else %}
+							<?= $this->Form->control('{{ field }}', ['options' => ${{ keyFields[field] }}]); ?><!-- 2. -->
+							{{- "\n" }}
+        {%- endif %}
+    {%- elseif field not in ['created', 'modified', 'updated'] %}
+        {%- set fieldData = Bake.columnData(field, schema) %}
+        {%- if fieldData.type in ['date', 'datetime', 'time'] and fieldData.null %}
+							<?= $this->Form->control('{{ field }}', ['empty' => true]); ?><!-- 3. -->
+							{{- "\n" }}
+        {%- else %}
+							<div class="mb-3 row">
+								<label class="form-label col-xs-12 col-sm-12 col-md-3 col-lg-3 col-xl-2 col-xxl-2 text-xs-start text-sm-start text-md-end pt-1">Name:</label>
+								<div class="col-xs-12 col-sm-12 col-md-8 col-lg-8 col-xl-6 col-xxl-5">
+								<?= $this->Form->control('{{ field }}', ['label' => false, 'placeholder' => __('{{ field }}'), 'class' => 'form-control']); ?><!-- 4. -->
+								<div class="invalid-feedback">
+									<?= __('Error text') ?>
+								</div>
+							  </div>
+							</div>
+							{{- "\n" }}
+        {%- endif %}
+    {%- endif %}
+{%- endif %}
+{%- endfor %}
+{%- if associations.BelongsToMany is defined %}
+{%- for assocName, assocData in associations.BelongsToMany %}
+							<?= $this->Form->control('{{ assocData.property }}._ids', ['options' => ${{ assocData.variable }}]); ?><!-- 5. -->
+							{{- "\n" }}
+{%- endfor %}
+{% endif %}
+						</div>
+<?php /*
+						<div class="tab-pane" id="simple-tabpanel-1" role="tabpanel" aria-labelledby="simple-tab-1">
+							
+						</div>
+						<div class="tab-pane" id="simple-tabpanel-2" role="tabpanel" aria-labelledby="simple-tab-2">
+							
+						</div>
+*/ ?>
+					</div>
+					
+				  <?= $this->Form->end() ?>
+
+				</div>
+
+                <div class="card-footer text-muted">
+					<div class="row">
+						<div class="col-md-2">
+							&nbsp;
+						</div>
+						<div class="col-md-10">
+							<?= $this->Form->button('<span class="btn-label"><i class="fa fa-save"></i></span>' . __('Save'), ["escapeTitle" => false, "type" => "submit", "class" => "btn btn-success me-2"]) ?>
+						</div>
+					</div>
+				</div>
+				
+              </div>
+			  
+            </div>
+
+<?php
+	$this->Html->css(
+		[
+			//'ValiCake./assets/sweetalert2/dist/sweetalert2.min',									// SweetAlert
+			//'ValiCake./assets/icheck-1.0.3/skins/all',											// iCheck
+			//'ValiCake./assets/bootstrap-select-main/docs/docs/dist/css/bootstrap-select.min',		// Select
+			//'ValiCake./assets/summernote-0.8.18-dist/summernote-lite.min',						// SummerNote WHYIWYG editor
+			//'ValiCake./assets/tempus-dominus-6.0.0/dist/css/tempus-dominus.min',					// Calendar plugin
+		],
+		['block' => true]);
+
+	$this->Html->script(
+		[
+			//'ValiCake./assets/sweetalert2/dist/sweetalert2.all.min',								// SweetAlert
+			//'ValiCake./assets/icheck-1.0.3/icheck.min',											// iCheck
+			//'ValiCake./assets/bootstrap-select-main/docs/docs/dist/js/bootstrap-select.min',		// Select
+			//'ValiCake./assets/bootstrap-select-main/docs/docs/dist/js/i18n/defaults-hu_HU.min',	// Select i18n
+			//'ValiCake./assets/bootstrap-input-spinner-bs-5/src/bootstrap-input-spinner',			// Input Spinner
+			//'ValiCake./assets/summernote-0.8.18-dist/summernote-lite.min',						// SummerNote WHYIWYG editor
+			//'ValiCake./assets/summernote-0.8.18-dist/lang/summernote-hu-HU',						// SummerNote WHYIWYG editor
+			//'ValiCake./js/moment.min',															// Moment.js must be loaded to the tempus-dominus !!
+			//'ValiCake./js/popper.min'",															// Must be loaded the popper.js to tempus-dominus !!
+			//'ValiCake./assets/tempus-dominus-6.0.0/dist/js/tempus-dominus.min',					// Calendar plugin (need popper.js)
+			
+		],
+		['block' => 'scriptBottom']
+	); ?>
+
+<?php $this->Html->scriptStart(['block' => 'javaScriptBottom']); ?>
+
+/*
+		jeffAdminInitSelectPicker()
+		jeffAdminInitInputSpinner()
+		jeffAdminInitSummerNote('memo', 400, '<?= __("Here you can write the note") ?>...') // Init SummerNote for short_text.
+		jeffAdminInitDatePicker('datepicker', '1971-08-28')
+		jeffAdminInitTimePicker('timepicker', '12:28:10')
+		jeffAdminInitDateTimePicker('datetimepicker', '2021-12-28 12:28:10')
+
+		$(document).ready(function(){
+			$('#button-submit').click( function(){
+				$('#main-form').submit();
+			});			
+
+			$('input[type="checkbox"]').iCheck({
+				checkboxClass: 'icheckbox_flat-green'
+			});
+		});
+*/
+
+	<?php $this->Html->scriptEnd(); ?>

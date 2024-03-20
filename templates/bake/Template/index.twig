@@ -1,0 +1,187 @@
+{#
+/**
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @since         2.0.0
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ */
+#}
+<?php
+/**
+ * @var \{{ namespace }}\View\AppView $this
+ * @var iterable<\{{ entityClass }}> ${{ pluralVar }}
+ */
+	$this->assign('title', __('List') . ' ' . __('{{ pluralHumanName }}'));
+?>
+{% set fields = Bake.filterFields(fields, schema, modelObject, indexColumns, ['binary', 'text']) %}
+			<div class="bs-component mb-2 shadow {{ pluralVar }} index">
+              <div class="card">
+                <div class="card-header">
+					<div class="row">
+						<div class="col-md-12">
+							<?= $this->Html->link('<span class="btn-label"><i class="fa fa-plus"></i></span>' . '&nbsp;' . __('Add {{ singularHumanName }}'), ['action' => 'add'], ['class' => 'btn btn-success', 'escape' => false]) ?>
+						</div>
+					</div>
+				</div>
+{% set done = [] %}
+				<div class="card-body">
+					<table class="table table-responsive table-striped table-bordered table-hover">
+						<thead>
+							<tr>
+{% for field in fields %}
+{% 	set isKey = false %}
+{% 	if associations.BelongsTo is defined %}
+{% 		for alias, details in associations.BelongsTo %}
+{% 			if field == details.foreignKey %}
+{% 				set isKey = true %}
+								<th class="string {{ field|replace({'_': '-'}) }}"><?= $this->Paginator->sort('{{ field }}') ?></th><!-- H.0. -->
+{% 			endif %}
+{% 		endfor %}
+{% 	endif %}
+{% 	if isKey is not same as(true) %}
+{%- 		if field not in ['xxx'] and '_count' not in field %}	
+{%- 			if isKey is not same as(true) %}
+{% 				set columnData = Bake.columnData(field, schema) %}
+{% 				if columnData.type in ['integer', 'float', 'decimal', 'biginteger', 'smallinteger', 'tinyinteger'] %}
+								<th class="{{ columnData.type }} {{ field|replace({'_': '-'}) }}"><?= $this->Paginator->sort('{{ field }}') ?></th><!-- H.1. -->
+{% 				elseif columnData.type in ['string'] %}
+								<th class="{{ columnData.type }} {{ field|replace({'_': '-'}) }}"><?= $this->Paginator->sort('{{ field }}') ?></th><!-- H.2. -->
+{% 				elseif columnData.null %}
+								<th class="{{ columnData.type }} {{ field|replace({'_': '-'}) }}"><?= $this->Paginator->sort('{{ field }}') ?></th><!-- H.2. -->
+{% 				else %}
+								<th class="{{ columnData.type }} {{ field|replace({'_': '-'}) }}"><?= $this->Paginator->sort('{{ field }}') ?></th><!-- H.3. -->
+{% 				endif %}
+{% 			endif %}
+{%- 		endif %}
+{%- 	endif %}
+{% endfor %}
+{% if hasVisible == true %}
+<?php if($config['show_pos']){ ?>
+								<th class="number pos"><?= $this->Paginator->sort('pos') ?></th>
+<?php } ?>
+{% endif %}
+{% if hasVisible == true %}
+<?php if($config['show_visible']){ ?>
+								<th class="boolean visible"><?= $this->Paginator->sort('visible') ?></th>
+<?php } ?>
+{% endif %}
+{% if hasCounters == true %}
+<?php if($config['show_counters']){ ?>
+{% for field in fields %}
+	{%- if '_count' in field %}
+								<th class="number counter {{ field }}"><?= $this->Paginator->sort('{{ field }}') ?></th>
+	{%- endif %}
+{% endfor %}
+<?php } ?>
+{% endif %}
+{% if hasCreatedModified == true %}
+<?php if($config['show_created'] || $config['show_modified']){ ?>
+
+								<th class="datetime created modified">
+												<?php 
+													if($config['show_created']){ 
+														echo $this->Paginator->sort('created');
+													}
+													if($config['show_created'] && $config['show_modified']){
+														echo "&nbsp;/&nbsp;";
+													}
+													if($config['show_modified']){
+														echo $this->Paginator->sort('modified');
+													} ?>
+
+								</th>
+<?php } ?>
+{% endif %}
+								<th class="actions"><?= __('Actions') ?></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php foreach (${{ pluralVar }} as ${{ singularVar }}): ?>
+							<tr<?= (${{ singularVar }}->id == 2) ? ' class="last-visited"' : ''?>>
+{% for field in fields %}
+{% set isKey = false %}
+{% if associations.BelongsTo is defined %}
+{% for alias, details in associations.BelongsTo %}
+{% if field == details.foreignKey %}
+{% set isKey = true %}
+								<td class="link {{ field|replace({'-': '_'})}}"><?= ${{ singularVar }}->hasValue('{{ details.property }}') ? $this->Html->link(${{ singularVar }}->{{ details.property }}->{{ details.displayField }}, ['controller' => '{{ details.controller }}', 'action' => 'view', ${{ singularVar }}->{{ details.property }}->{{ details.primaryKey[0] }}]) : '' ?></td>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if isKey is not same as(true) %}
+{% set columnData = Bake.columnData(field, schema) %}
+{% if columnData.type starts with 'enum-' %}
+								<td class="string {{ field }}"><?= ${{ singularVar }}->{{ field }} === null ? '' : h(${{ singularVar }}->{{ field }}->label()) ?></td>
+{% elseif columnData.type in ['integer', 'float', 'decimal', 'biginteger', 'smallinteger', 'tinyinteger'] %}
+								<td class="number integer {{ field }}"><?= h(${{ singularVar }}->{{ field }}) ?></td>
+{% elseif columnData.type in ['string'] %}
+								<td class="string integer {{ field }}"><?= h(${{ singularVar }}->{{ field }}) ?></td>
+{% elseif columnData.type in ['boolean'] %}
+								<td class="boolean integer {{ field }}" value="<?= ${{ singularVar }}->{{ field }} ? 1 : 0?>"></td>
+{% elseif columnData.type in ['date'] %}
+								<td class="{{ columnData.type }} {{ field }}" value="<?= ${{ singularVar }}->{{ field }} ?>"><?= h(${{ singularVar }}->{{ field }}) ?></td>
+{% elseif columnData.type in ['time'] %}
+								<td class="{{ columnData.type }} {{ field }}" value="<?= ${{ singularVar }}->{{ field }} ?>"><?= h(${{ singularVar }}->{{ field }}) ?></td>
+{% elseif columnData.type in ['datetime'] %}
+								<td class="{{ columnData.type }} {{ field }}" value="<?= ${{ singularVar }}->{{ field }} ?>"><?= h(${{ singularVar }}->{{ field }}) ?></td>
+{% elseif columnData.null %}
+								<td class="number {{ field }}"><?= ${{ singularVar }}->{{ field }} === null ? '' : $this->Number->format(${{ singularVar }}->{{ field }}) ?></td>
+{% else %}
+								<td class="number {{ field }}"><?= $this->Number->format(${{ singularVar }}->{{ field }}) ?></td>
+{% endif %}
+{% endif %}
+{% endfor %}
+{% set pk = '$' ~ singularVar ~ '->' ~ primaryKey[0] %}
+								<td class="actions">
+									<?= $this->Html->link('<i class="fa fa-eye"></i>', ['action' => 'view', {{ pk|raw }}], ['escape' => false, 'class' => 'btn btn-sm btn-warning', 'role' => 'button']) ?>
+									<?= $this->Html->link('<i class="fa fa-edit"></i>', ['action' => 'edit', {{ pk|raw }}], ['escape' => false, 'class' => 'btn btn-sm btn-primary', 'role' => 'button']) ?>
+									<?= $this->Form->postLink('', ['action' => 'delete', {{ pk|raw }}], ['class'=>'hide-postlink index-delete-button-class']) ?>
+									<a href="javascript:;" class="btn btn-sm btn-danger postlink-delete" data-bs-tooltip="tooltip" data-bs-placement="top" title="<?= __("Delete this record!") ?>" text="<?= h(${{ singularVar }}->name) ?>" subText="<?= __("You will not be able to revert this!") ?>" confirmButtonText="<?= __("Yes, delete it!") ?>" cancelButtonText="<?= __("Cancel") ?>"><i class="fa fa-minus"></i></a>
+								</td>
+							</tr>
+							<?php endforeach; ?>
+						</tbody>
+					</table>
+				</div>
+                <div class="card-footer text-muted">
+					<div class="row">
+						<div class="col-md-6">
+							<?= $this->element('ValiCake.paginator_counter') ?>
+						</div>
+						<div class="col-md-6">		
+							<?= $this->element('ValiCake.paginator') ?>							
+						</div>
+					</div>
+				</div>
+              </div>
+            </div>
+
+<?php
+	$this->Html->css(
+		[
+			//'ValiCake./assets/sweetalert2/dist/sweetalert2.min',
+		],
+		['block' => true]);	
+	
+	$this->Html->script(
+		[
+			//'ValiCake./assets/sweetalert2/dist/sweetalert2.all.min',
+		],
+		['block' => 'scriptBottom']
+	);
+
+?>
+
+
+<?php $this->Html->scriptStart(['block' => 'javaScriptBottom']); ?>
+<?php /*
+		//jeffAdminInitSelectPicker()
+*/ ?>
+	<?php $this->Html->scriptEnd(); ?>

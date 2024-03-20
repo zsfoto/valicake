@@ -1,0 +1,36 @@
+{#
+/**
+ * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link          https://cakephp.org CakePHP(tm) Project
+ * @since         2.0.0
+ * @license       https://www.opensource.org/licenses/mit-license.php MIT License
+ */
+#}
+    /**
+     * Delete method
+     *
+     * @param string|null $id {{ singularHumanName }} id.
+     * @return \Cake\Http\Response|null Redirects to index.
+     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
+     */
+    public function delete($id = null)
+    {
+        $this->request->allowMethod(['post', 'delete']);
+        ${{ singularName }} = $this->{{ currentModelName }}->get($id);
+        if ($this->{{ currentModelName }}->delete(${{ singularName }})) {
+            //$this->Flash->success(__('The {{ singularHumanName|lower }} has been deleted.'), ['plugin' => 'ValiCake']);
+            $this->Flash->success(__('Has been deleted.'), ['plugin' => 'ValiCake']);
+        } else {
+            //$this->Flash->error(__('The {{ singularHumanName|lower }} could not be deleted. Please, try again.'), ['plugin' => 'ValiCake']);
+            $this->Flash->error(__('Could not be deleted. Please, try again.'), ['plugin' => 'ValiCake']);
+        }
+
+        return $this->redirect(['action' => 'index']);
+    }
