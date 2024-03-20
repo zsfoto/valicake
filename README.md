@@ -1,4 +1,4 @@
-# ValiCake Admin plugin for CakePHP 5.x
+# * NOT FINISH! * ValiCake Admin plugin for CakePHP 5.x
 
 ## Installation
 
